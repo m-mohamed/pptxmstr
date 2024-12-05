@@ -1,0 +1,17 @@
+# docker-compose.prod.yaml
+services:
+  tee:
+    extends:
+      file: docker-compose.base.yml
+      service: tee
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+      args:
+        - NODE_ENV=production
+    volumes:
+      - tee:/app/packages/client-twitter/src/tweetcache
+      - tee:/app/db.sqlite
+    env_file:
+      - .env.prod

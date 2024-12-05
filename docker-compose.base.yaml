@@ -1,0 +1,13 @@
+# docker-compose.base.yaml (shared configuration)
+services:
+  tee:
+    stdin_open: true
+    tty: true
+    volumes:
+      - /var/run/tappd.sock:/var/run/tappd.sock
+    ports:
+      - "3000:80"
+    restart: always
+
+volumes:
+  tee:

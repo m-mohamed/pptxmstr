@@ -1,0 +1,21 @@
+# docker-compose.dev.yaml
+services:
+  tee:
+    extends:
+      file: docker-compose.base.yml
+      service: tee
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+      args:
+        - NODE_ENV=development
+    volumes:
+      - ./agent:/app/agent
+      - ./packages:/app/packages
+      - ./scripts:/app/scripts
+      - ./characters:/app/characters
+      - tee:/app/packages/client-twitter/src/tweetcache
+      - tee:/app/db.sqlite
+    env_file:
+      - .env.dev

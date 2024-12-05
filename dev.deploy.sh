@@ -1,34 +1,48 @@
 #!/bin/bash
-# dev.deploy.sh
+set -e  # Exit on any error
 
-# Get the current branch and commit
+# Validate required environment variables
+if [ -z "${ECR_REPO}" ]; then
+    echo "Error: ECR_REPO environment variable must be set"
+    exit 1
+fi
+
+if [ -z "${AWS_REGION}" ]; then
+    echo "Error: AWS_REGION environment variable must be set"
+    exit 1
+fi
+
+# Get Git information
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 COMMIT=$(git rev-parse --short HEAD)
 
-# Transform branch name to be Docker-tag compliant
-# Replace '/' with '-' and remove any other invalid characters
-SAFE_BRANCH=$(echo "${BRANCH}" | sed 's/[\/]/-/g' | sed 's/[^a-zA-Z0-9-.]/-/g')
-IMAGE_TAG="${SAFE_BRANCH}-${COMMIT}-dev"  # or -prod for production
+# Transform branch name
+SAFE_BRANCH=$(echo "${BRANCH}" | tr '/' '-' | tr -cd 'a-zA-Z0-9-.')
+IMAGE_TAG="${SAFE_BRANCH}-${COMMIT}-dev"
 
-# Example transformations:
-# feature/docker-enabled -> feature-docker-enabled
-# bug/fix/123 -> bug-fix-123
+# Debug output
+echo "ECR Repository: ${ECR_REPO}"
+echo "AWS Region: ${AWS_REGION}"
+echo "Original Branch: ${BRANCH}"
+echo "Safe Branch: ${SAFE_BRANCH}"
+echo "Final Image Tag: ${ECR_REPO}:${IMAGE_TAG}"
 
-
-# Build development image for ECR
-docker build -t ${ECR_REPO}:${BRANCH}-${COMMIT}-dev \
+# Build development image
+docker build \
+    --platform=linux/amd64 \
+    -t "${ECR_REPO}:${IMAGE_TAG}" \
     --target development \
-    --build-arg NODE_ENV=development .
+    --build-arg NODE_ENV=development \
+    .
 
 # Authenticate with ECR
 aws ecr get-login-password --region ${AWS_REGION} | \
     docker login --username AWS --password-stdin ${ECR_REPO}
 
 # Push development image to ECR
-docker push ${ECR_REPO}:${BRANCH}-${COMMIT}-dev
+docker push ${ECR_REPO}:${IMAGE_TAG}
 
 # Create a temporary task definition with substituted values
-IMAGE_TAG="${BRANCH}-${COMMIT}-dev"
 jq --arg img "381491839026.dkr.ecr.us-west-2.amazonaws.com/eliza-agent:${IMAGE_TAG}" \
   '.containerDefinitions[0].image = $img' task-definition.dev.json > task-definition.dev.tmp.json
 
