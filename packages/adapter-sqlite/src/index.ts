@@ -1,3 +1,5 @@
+import { DatabaseLogger } from './utils/dbLogger';
+import { elizaLogger } from "@ai16z/eliza";  // Add this import if not already present
 export * from "./sqliteTables.ts";
 export * from "./sqlite_vec.ts";
 
@@ -19,8 +21,7 @@ import { sqliteTables } from "./sqliteTables.ts";
 
 export class SqliteDatabaseAdapter
     extends DatabaseAdapter<Database>
-    implements IDatabaseCacheAdapter
-{
+    implements IDatabaseCacheAdapter {
     async getRoom(roomId: UUID): Promise<UUID | null> {
         const sql = "SELECT id FROM rooms WHERE id = ?";
         const room = this.db.prepare(sql).get(roomId) as
@@ -248,8 +249,8 @@ export class SqliteDatabaseAdapter
 
         let sql = `
             SELECT *, vec_distance_L2(embedding, ?) AS similarity
-            FROM memories 
-            WHERE type = ? 
+            FROM memories
+            WHERE type = ?
             AND roomId = ?`;
 
         if (params.unique) {
@@ -340,24 +341,24 @@ export class SqliteDatabaseAdapter
         // First get content text and calculate Levenshtein distance
         const sql = `
             WITH content_text AS (
-                SELECT 
+                SELECT
                     embedding,
                     json_extract(
                         json(content),
                         '$.' || ? || '.' || ?
                     ) as content_text
-                FROM memories 
+                FROM memories
                 WHERE type = ?
                 AND json_extract(
                     json(content),
                     '$.' || ? || '.' || ?
                 ) IS NOT NULL
             )
-            SELECT 
+            SELECT
                 embedding,
                 length(?) + length(content_text) - (
                     length(?) + length(content_text) - (
-                        length(replace(lower(?), lower(content_text), '')) + 
+                        length(replace(lower(?), lower(content_text), '')) +
                         length(replace(lower(content_text), lower(?), ''))
                     ) / 2
                 ) as levenshtein_score
@@ -395,22 +396,41 @@ export class SqliteDatabaseAdapter
         this.db.prepare(sql).run(params.status, params.goalId);
     }
 
+
+    // Then update your log method:
     async log(params: {
         body: { [key: string]: unknown };
         userId: UUID;
         roomId: UUID;
         type: string;
     }): Promise<void> {
-        const sql =
-            "INSERT INTO logs (body, userId, roomId, type) VALUES (?, ?, ?, ?)";
-        this.db
-            .prepare(sql)
-            .run(
-                JSON.stringify(params.body),
-                params.userId,
-                params.roomId,
-                params.type
-            );
+        const sql = "INSERT INTO logs (body, userId, roomId, type) VALUES (?, ?, ?, ?)";
+        const sqlParams = [
+            JSON.stringify(params.body),
+            params.userId,
+            params.roomId,
+            params.type
+        ];
+
+        try {
+            this.db.prepare(sql).run(...sqlParams);
+        } catch (error) {
+            DatabaseLogger.logError({
+                operation: 'insert_log',
+                sql,
+                params: sqlParams,
+                error,
+                context: {
+                    bodyKeys: Object.keys(params.body),
+                    bodyLength: JSON.stringify(params.body).length,
+                    userId: params.userId,
+                    roomId: params.roomId,
+                    type: params.type
+                }
+            });
+
+            elizaLogger.error('Database logging failed but continuing execution');
+        }
     }
 
     async getMemories(params: {
