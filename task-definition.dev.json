@@ -2,8 +2,8 @@
   "family": "eliza-agent-dev",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
-  "cpu": "512",
-  "memory": "1024",
+  "cpu": "1024",
+  "memory": "2048",
   "executionRoleArn": "arn:aws:iam::381491839026:role/ecsTaskExecutionRole",
   "taskRoleArn": "arn:aws:iam::381491839026:role/ecsTaskExecutionRole",
   "containerDefinitions": [
