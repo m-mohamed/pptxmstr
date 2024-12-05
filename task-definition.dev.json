@@ -22,6 +22,22 @@
           "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/AWS_KMS_KEY_ID"
         },
         {
+          "name": "DSTACK_SIMULATOR_ENDPOINT",
+          "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/DSTACK_SIMULATOR_ENDPOINT"
+        },
+        {
+          "name": "WALLET_SECRET_SALT",
+          "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/WALLET_SECRET_SALT"
+        },
+        {
+          "name": "TWITTER_POLL_INTERVAL",
+          "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/TWITTER_POLL_INTERVAL"
+        },
+        {
+          "name": "GALADRIEL_API_KEY",
+          "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/GALADRIEL_API_KEY"
+        },
+        {
           "name": "OPENAI_API_KEY",
           "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/OPENAI_API_KEY"
         },
