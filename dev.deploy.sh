@@ -1,6 +1,12 @@
 #!/bin/bash
 set -e  # Exit on any error
 
+export ECR_REPO="381491839026.dkr.ecr.us-west-2.amazonaws.com/eliza-agent"
+export AWS_REGION="us-west-2"
+
+echo $ECR_REPO
+echo $AWS_REGION
+
 # Validate required environment variables
 if [ -z "${ECR_REPO}" ]; then
     echo "Error: ECR_REPO environment variable must be set"
