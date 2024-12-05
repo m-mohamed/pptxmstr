@@ -53,3 +53,4 @@ COPY --from=builder /app/characters ./characters
 
 # Set the command to run the application
 CMD ["pnpm", "start", "--non-interactive", "--characters=\"characters/pptx.character.json\""]
+
