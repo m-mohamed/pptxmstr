@@ -2,14 +2,25 @@
   "family": "eliza-agent-dev",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
-  "cpu": "256",
-  "memory": "512",
+  "cpu": "512",
+  "memory": "1024",
   "executionRoleArn": "arn:aws:iam::381491839026:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::381491839026:role/ecsTaskExecutionRole",
   "containerDefinitions": [
-    {
+   {
       "name": "eliza-agent",
       "image": "381491839026.dkr.ecr.us-west-2.amazonaws.com/eliza-agent:${BRANCH}-${COMMIT}-dev",
+      "environment": [
+        {
+          "name": "AWS_KMS_KEY_ALIAS",
+          "value": "alias/eliza-tee-key"
+        }
+      ],
       "secrets": [
+        {
+          "name": "AWS_KMS_KEY_ID",
+          "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/AWS_KMS_KEY_ID"
+        },
         {
           "name": "OPENAI_API_KEY",
           "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/OPENAI_API_KEY"
@@ -61,6 +72,18 @@
         {
             "name": "TWITTER_EMAIL",
             "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/TWITTER_EMAIL"
+        },
+        {
+             "name": "POST_INTERVAL_MIN",
+             "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/POST_INTERVAL_MIN"
+        },
+        {
+             "name": "POST_INTERVAL_MAX",
+             "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/POST_INTERVAL_MAX"
+        },
+        {
+             "name": "POST_IMMEDIATELY",
+             "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/POST_IMMEDIATELY"
         },
         {
             "name": "SOL_ADDRESS",

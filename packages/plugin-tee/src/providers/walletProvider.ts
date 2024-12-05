@@ -3,7 +3,7 @@ import { IAgentRuntime, Memory, Provider, State } from "@ai16z/eliza";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
 import NodeCache from "node-cache";
-import { DeriveKeyProvider } from "./deriveKeyProvider";
+import { DeriveKeyProvider } from "./og_deriveKeyProvider";
 // Provider configuration
 const PROVIDER_CONFIG = {
     BIRDEYE_API: "https://public-api.birdeye.so",
@@ -198,8 +198,8 @@ export class WalletProvider {
                         token === SOL
                             ? "solana"
                             : token === BTC
-                              ? "bitcoin"
-                              : "ethereum"
+                                ? "bitcoin"
+                                : "ethereum"
                     ].usd = price;
                 } else {
                     console.warn(`No price data available for token: ${token}`);
