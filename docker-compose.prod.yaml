@@ -2,7 +2,7 @@
 services:
   tee:
     extends:
-      file: docker-compose.base.yml
+      file: docker-compose.base.yaml
       service: tee
     build:
       context: .

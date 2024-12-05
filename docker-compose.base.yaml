@@ -10,4 +10,5 @@ services:
     restart: always
 
 volumes:
-  tee:
+  tweet-cache: {}
+  db-data: {}

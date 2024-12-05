@@ -2,7 +2,7 @@
 services:
   tee:
     extends:
-      file: docker-compose.base.yml
+      file: docker-compose.base.yaml
       service: tee
     build:
       context: .
@@ -11,11 +11,17 @@ services:
       args:
         - NODE_ENV=development
     volumes:
-      - ./agent:/app/agent
-      - ./packages:/app/packages
+      - ./agent:/app/agent:delegated
+      - ./packages:/app/packages:delegated
+      - /app/agent/node_modules
+      - /app/packages/node_modules
       - ./scripts:/app/scripts
       - ./characters:/app/characters
-      - tee:/app/packages/client-twitter/src/tweetcache
-      - tee:/app/db.sqlite
+      - tweet-cache:/app/packages/client-twitter/src/tweetcache
+      - db-data:/app/db.sqlite
     env_file:
       - .env.dev
+
+volumes:
+  tweet-cache: {}
+  db-data: {}
