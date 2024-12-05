@@ -1,7 +1,4 @@
 // packages/plugin-tee/src/services/cloud/cloudTEEService.ts
-import pkg from 'aws-sdk';
-const { KMS } = pkg;
-
 import { BaseTEEService } from '../base/baseTEEService';
 import {
     TEEError,
@@ -13,8 +10,16 @@ import {
 } from '../../types';
 import { DeriveKeyResponse } from "@phala/dstack-sdk";
 
+// Define types for AWS SDK v2 to maintain type safety
+type KMSInstance = any; // We'll type this properly when the instance is created
+type GenerateDataKeyResponse = {
+    Plaintext?: Buffer;
+    KeyId: string;
+};
+
 export class CloudTEEService extends BaseTEEService {
-    private kms: pkg.KMS;
+    private kms: KMSInstance;
+    private initialized: boolean = false;
 
     constructor(config: TEEServiceConfig) {
         super(config);
@@ -25,23 +30,49 @@ export class CloudTEEService extends BaseTEEService {
             );
         }
 
-        this.kms = new KMS({
-            region: config.awsRegion
-        });
+        this.initializeKMS(config.awsRegion);
+    }
+
+    private async initializeKMS(region: string) {
+        try {
+            // Dynamic import of aws-sdk
+            const AWS = await import('aws-sdk').then(m => m.default);
+            this.kms = new AWS.KMS({ region });
+            this.initialized = true;
+        } catch (error) {
+            throw new TEEError(
+                TEEErrorCode.UNKNOWN_ERROR,
+                'Failed to initialize AWS KMS',
+                error
+            );
+        }
+    }
+
+    private async ensureInitialized(): Promise<void> {
+        if (!this.initialized || !this.kms) {
+            throw new TEEError(
+                TEEErrorCode.UNKNOWN_ERROR,
+                'KMS service not properly initialized'
+            );
+        }
     }
 
     async deriveKey(path: string, subject: string): Promise<TEEResponse<KeyDerivationResponse>> {
         try {
+            await this.ensureInitialized();
             this.validateInput(path, subject);
 
-            const { Plaintext } = await this.kms.generateDataKey({
+            const params = {
                 KeyId: this.config.awsKmsKeyId,
                 KeySpec: 'AES_256',
                 EncryptionContext: {
                     path,
                     subject
                 }
-            }).promise();
+            };
+
+            const response = await this.kms.generateDataKey(params).promise();
+            const { Plaintext } = response as GenerateDataKeyResponse;
 
             if (!Plaintext) {
                 throw new TEEError(
@@ -50,12 +81,10 @@ export class CloudTEEService extends BaseTEEService {
                 );
             }
 
-            // Convert Plaintext to Uint8Array safely
-            const uint8Array = new Uint8Array(Plaintext instanceof Buffer ? Plaintext : new Uint8Array());
-
+            // Create a DeriveKeyResponse that matches the expected interface
             const derivedKey: DeriveKeyResponse = {
-                asUint8Array: () => uint8Array,
-                key: uint8Array.toString(),
+                asUint8Array: () => new Uint8Array(Plaintext),
+                key: Plaintext.toString('base64'),
                 certificate_chain: []
             };
 
@@ -78,36 +107,38 @@ export class CloudTEEService extends BaseTEEService {
 
     async generateAttestation(): Promise<TEEResponse<AttestationResponse>> {
         try {
+            await this.ensureInitialized();
+
             const timestamp = new Date().toISOString();
             const messageString = `attestation-${timestamp}`;
 
-            const { Signature, SigningAlgorithm } = await this.kms.sign({
+            const params = {
                 KeyId: this.config.awsKmsKeyId,
-                Message: messageString,
+                Message: Buffer.from(messageString),
                 SigningAlgorithm: 'RSASSA_PKCS1_V1_5_SHA_256',
                 MessageType: 'RAW'
-            }).promise();
+            };
 
-            if (!Signature) {
+            const signResponse = await this.kms.sign(params).promise();
+
+            if (!signResponse.Signature) {
                 throw new TEEError(
                     TEEErrorCode.ATTESTATION_FAILED,
                     'No signature returned from KMS'
                 );
             }
 
-            // Convert Signature to Uint8Array safely
-            const signatureArray = new Uint8Array(Signature instanceof Buffer ? Signature : new Uint8Array());
-
-            const { PublicKey } = await this.kms.getPublicKey({
+            const publicKeyResponse = await this.kms.getPublicKey({
                 KeyId: this.config.awsKmsKeyId
             }).promise();
 
             return {
                 data: {
-                    attestation: signatureArray.toString(),
+                    attestation: signResponse.Signature.toString('base64'),
                     certificateChain: [
-                        PublicKey ? new Uint8Array(PublicKey instanceof Buffer ? PublicKey : new Uint8Array()).toString() : '',
-                        SigningAlgorithm || 'RSASSA_PKCS1_V1_5_SHA_256'
+                        publicKeyResponse.PublicKey ?
+                            Buffer.from(publicKeyResponse.PublicKey).toString('base64') : '',
+                        signResponse.SigningAlgorithm || 'RSASSA_PKCS1_V1_5_SHA_256'
                     ]
                 }
             };

@@ -122,10 +122,6 @@
             "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/SERVER_PORT"
         },
         {
-            "name": "WALLET_SECRET_SALT",
-            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/WALLET_SECRET_SALT"
-        },
-        {
             "name": "ANTHROPIC_API_KEY",
             "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/ANTHROPIC_API_KEY"
         },
