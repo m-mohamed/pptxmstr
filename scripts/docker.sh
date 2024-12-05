@@ -40,6 +40,7 @@ case "$1" in
             "client-telegram"
             "client-twitter"
             "core"
+            "plugin-aptos"
             "plugin-bootstrap"
             "plugin-image-generation"
             "plugin-node"
@@ -49,7 +50,7 @@ case "$1" in
         )
 
         # Start building the docker run command
-        CMD="docker run --platform linux/amd64 -p 3000:3000 -d"
+        CMD="docker run --platform linux/amd64 -p 3001:3000 -d"
 
         # Add base mounts
         for mount in "${BASE_MOUNTS[@]}"; do
