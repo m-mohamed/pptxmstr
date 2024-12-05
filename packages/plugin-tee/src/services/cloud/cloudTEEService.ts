@@ -1,5 +1,7 @@
 // packages/plugin-tee/src/services/cloud/cloudTEEService.ts
-import { KMS } from 'aws-sdk';
+import pkg from 'aws-sdk';
+const { KMS } = pkg;
+
 import { BaseTEEService } from '../base/baseTEEService';
 import {
     TEEError,
@@ -12,7 +14,7 @@ import {
 import { DeriveKeyResponse } from "@phala/dstack-sdk";
 
 export class CloudTEEService extends BaseTEEService {
-    private kms: KMS;
+    private kms: pkg.KMS;
 
     constructor(config: TEEServiceConfig) {
         super(config);
