@@ -20,7 +20,7 @@ services:
       - tweet-cache:/app/packages/client-twitter/src/tweetcache
       - db-data:/app/db.sqlite
     env_file:
-      - .env.dev
+      - .env
 
 volumes:
   tweet-cache: {}

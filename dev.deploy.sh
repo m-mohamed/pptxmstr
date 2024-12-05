@@ -67,3 +67,5 @@ aws ecs update-service \
     --service eliza-service \
     --task-definition $(cat task-definition.dev.arn) \
     --force-new-deployment
+
+rm task-definition.dev.arn
