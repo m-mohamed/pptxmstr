@@ -5,6 +5,18 @@
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 COMMIT=$(git rev-parse --short HEAD)
 
+# Build development image for ECR
+docker build -t ${ECR_REPO}:${BRANCH}-${COMMIT}-dev \
+    --target development \
+    --build-arg NODE_ENV=development .
+
+# Authenticate with ECR
+aws ecr get-login-password --region ${AWS_REGION} | \
+    docker login --username AWS --password-stdin ${ECR_REPO}
+
+# Push development image to ECR
+docker push ${ECR_REPO}:${BRANCH}-${COMMIT}-dev
+
 # Create a temporary task definition with substituted values
 IMAGE_TAG="${BRANCH}-${COMMIT}-dev"
 jq --arg img "381491839026.dkr.ecr.us-west-2.amazonaws.com/eliza-agent:${IMAGE_TAG}" \

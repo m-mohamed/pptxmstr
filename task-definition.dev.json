@@ -1,0 +1,134 @@
+{
+  "family": "eliza-agent-dev",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::381491839026:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "eliza-agent",
+      "image": "381491839026.dkr.ecr.us-west-2.amazonaws.com/eliza-agent:${BRANCH}-${COMMIT}-dev",
+      "secrets": [
+        {
+          "name": "OPENAI_API_KEY",
+          "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/OPENAI_API_KEY"
+        },
+        {
+            "name": "ELEVENLABS_MODEL_ID",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/ELEVENLABS_MODEL_ID"
+        },
+        {
+            "name": "ELEVENLABS_VOICE_ID",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/ELEVENLABS_VOICE_ID"
+        },
+        {
+            "name": "ELEVENLABS_VOICE_STABILITY",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/ELEVENLABS_VOICE_STABILITY"
+        },
+        {
+            "name": "ELEVENLABS_VOICE_SIMILARITY_BOOST",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/ELEVENLABS_VOICE_SIMILARITY_BOOST"
+        },
+        {
+            "name": "ELEVENLABS_VOICE_STYLE",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/ELEVENLABS_VOICE_STYLE"
+        },
+        {
+            "name": "ELEVENLABS_VOICE_USE_SPEAKER_BOOST",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/ELEVENLABS_VOICE_USE_SPEAKER_BOOST"
+        },
+        {
+            "name": "ELEVENLABS_OPTIMIZE_STREAMING_LATENCY",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/ELEVENLABS_OPTIMIZE_STREAMING_LATENCY"
+        },
+        {
+            "name": "ELEVENLABS_OUTPUT_FORMAT",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/ELEVENLABS_OUTPUT_FORMAT"
+        },
+        {
+            "name": "TWITTER_DRY_RUN",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/TWITTER_DRY_RUN"
+        },
+        {
+            "name": "TWITTER_USERNAME",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/TWITTER_USERNAME"
+        },
+        {
+            "name": "TWITTER_PASSWORD",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/TWITTER_PASSWORD"
+        },
+        {
+            "name": "TWITTER_EMAIL",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/TWITTER_EMAIL"
+        },
+        {
+            "name": "SOL_ADDRESS",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/SOL_ADDRESS"
+        },
+        {
+            "name": "SLIPPAGE",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/SLIPPAGE"
+        },
+        {
+            "name": "RPC_URL",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/RPC_URL"
+        },
+        {
+            "name": "HELIUS_API_KEY",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/HELIUS_API_KEY"
+        },
+        {
+            "name": "SERVER_PORT",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/SERVER_PORT"
+        },
+        {
+            "name": "WALLET_SECRET_SALT",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/WALLET_SECRET_SALT"
+        },
+        {
+            "name": "ANTHROPIC_API_KEY",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/ANTHROPIC_API_KEY"
+        },
+        {
+            "name": "HEURIST_API_KEY",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/HEURIST_API_KEY"
+        },
+        {
+            "name": "SMALL_HEURIST_LANGUAGE_MODEL",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/SMALL_HEURIST_LANGUAGE_MODEL"
+        },
+        {
+            "name": "MEDIUM_HEURIST_LANGUAGE_MODEL",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/MEDIUM_HEURIST_LANGUAGE_MODEL"
+        },
+        {
+            "name": "LARGE_HEURIST_LANGUAGE_MODEL",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/LARGE_HEURIST_LANGUAGE_MODEL"
+        },
+        {
+            "name": "HEURIST_IMAGE_MODEL",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/HEURIST_IMAGE_MODEL"
+        },
+        {
+            "name": "INTIFACE_WEBSOCKET_URL",
+            "valueFrom": "arn:aws:ssm:us-west-2:381491839026:parameter/eliza/dev/INTIFACE_WEBSOCKET_URL"
+        }
+      ],
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "protocol": "tcp"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/eliza-agent",
+          "awslogs-region": "us-west-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}
