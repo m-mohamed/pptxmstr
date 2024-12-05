@@ -5,6 +5,16 @@
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 COMMIT=$(git rev-parse --short HEAD)
 
+# Transform branch name to be Docker-tag compliant
+# Replace '/' with '-' and remove any other invalid characters
+SAFE_BRANCH=$(echo "${BRANCH}" | sed 's/[\/]/-/g' | sed 's/[^a-zA-Z0-9-.]/-/g')
+IMAGE_TAG="${SAFE_BRANCH}-${COMMIT}-dev"  # or -prod for production
+
+# Example transformations:
+# feature/docker-enabled -> feature-docker-enabled
+# bug/fix/123 -> bug-fix-123
+
+
 # Build development image for ECR
 docker build -t ${ECR_REPO}:${BRANCH}-${COMMIT}-dev \
     --target development \
