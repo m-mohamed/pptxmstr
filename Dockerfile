@@ -18,6 +18,7 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc turbo.json ./
 
 # Copy the rest of the application code
+COPY packages/create-eliza-app/package.json ./packages/create-eliza-app/package.json
 COPY agent ./agent
 COPY packages ./packages
 COPY scripts ./scripts
@@ -25,9 +26,12 @@ COPY characters ./characters
 
 # Install dependencies, including unbuild, and build the project
 RUN pnpm install && \
+    cd packages/create-eliza-app && \
     pnpm add -D unbuild && \
+    cd ../.. && \
     pnpm build && \
     pnpm prune --prod
+
 
 # Create a new stage for the dev image
 FROM node:23.3.0-slim AS development
@@ -51,12 +55,17 @@ COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/characters ./characters
 
+
 # Add environment variables for development
 ENV NODE_ENV=development
 ENV CHOKIDAR_USEPOLLING=true
 ENV WATCHPACK_POLLING=true
 
+
 CMD ["pnpm", "start", "--characters=\"characters/pptxmstr.character.json\"", "--non-interactive"]
+
+
+
 
 # Create a new stage for the production image
 FROM node:23.3.0-slim AS production
